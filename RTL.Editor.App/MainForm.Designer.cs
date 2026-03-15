@@ -25,7 +25,7 @@ partial class MainForm
     {
         menuStrip1 = new MenuStrip();
         fileToolStripMenuItem = new ToolStripMenuItem();
-        loadSampleToolStripMenuItem = new ToolStripMenuItem();
+       // loadSampleToolStripMenuItem = new ToolStripMenuItem();
         getHtmlToolStripMenuItem = new ToolStripMenuItem();
         openFileToolStripMenuItem = new ToolStripMenuItem();
         saveFileToolStripMenuItem = new ToolStripMenuItem();
@@ -47,38 +47,31 @@ partial class MainForm
         // 
         // fileToolStripMenuItem
         // 
-        fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { loadSampleToolStripMenuItem, getHtmlToolStripMenuItem, openFileToolStripMenuItem, saveFileToolStripMenuItem });
+        fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { getHtmlToolStripMenuItem, openFileToolStripMenuItem, saveFileToolStripMenuItem });
         fileToolStripMenuItem.Name = "fileToolStripMenuItem";
         fileToolStripMenuItem.Size = new Size(12, 20);
         fileToolStripMenuItem.Text = "File";
-        // 
-        // loadSampleToolStripMenuItem
-        // 
-        loadSampleToolStripMenuItem.Name = "loadSampleToolStripMenuItem";
-        loadSampleToolStripMenuItem.Size = new Size(180, 22);
-        loadSampleToolStripMenuItem.Text = "Load sample";
-        loadSampleToolStripMenuItem.Click += loadSampleToolStripMenuItem_Click;
         // 
         // getHtmlToolStripMenuItem
         // 
         getHtmlToolStripMenuItem.Name = "getHtmlToolStripMenuItem";
         getHtmlToolStripMenuItem.Size = new Size(180, 22);
         getHtmlToolStripMenuItem.Text = "Get HTML";
-        getHtmlToolStripMenuItem.Click += getHtmlToolStripMenuItem_Click;
+        getHtmlToolStripMenuItem.Click += GetHtmlToolStripMenuItem_Click;
         // 
         // openFileToolStripMenuItem
         // 
         openFileToolStripMenuItem.Name = "openFileToolStripMenuItem";
         openFileToolStripMenuItem.Size = new Size(180, 22);
         openFileToolStripMenuItem.Text = "Open...";
-        openFileToolStripMenuItem.Click += openFileToolStripMenuItem_Click;
+        openFileToolStripMenuItem.Click += OpenFileToolStripMenuItem_Click;
         // 
         // saveFileToolStripMenuItem
         // 
         saveFileToolStripMenuItem.Name = "saveFileToolStripMenuItem";
         saveFileToolStripMenuItem.Size = new Size(180, 22);
         saveFileToolStripMenuItem.Text = "Save...";
-        saveFileToolStripMenuItem.Click += saveFileToolStripMenuItem_Click;
+        saveFileToolStripMenuItem.Click += SaveFileToolStripMenuItem_Click;
         // 
         // webView
         // 
@@ -117,7 +110,7 @@ partial class MainForm
 
     private System.Windows.Forms.MenuStrip menuStrip1;
     private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
-    private System.Windows.Forms.ToolStripMenuItem loadSampleToolStripMenuItem;
+   // private System.Windows.Forms.ToolStripMenuItem loadSampleToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem getHtmlToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem openFileToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem saveFileToolStripMenuItem;

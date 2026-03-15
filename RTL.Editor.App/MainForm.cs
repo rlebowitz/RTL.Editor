@@ -1,5 +1,7 @@
 ﻿using Microsoft.Web.WebView2.Core;
+using System.Reflection;
 using System.Text.Json;
+
 
 namespace RTL.Editor.App
 {
@@ -13,14 +15,12 @@ namespace RTL.Editor.App
         private async void MainForm_Load(object? sender, EventArgs e)
         {
             await webView.EnsureCoreWebView2Async();
-
             // Optional: listen for messages from JS
             webView.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
-
-            webView.CoreWebView2.NavigateToString(GetEditorHtml());
+            webView.CoreWebView2.NavigateToString(GetHtml());
         }
 
-        private async void openFileToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void OpenFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             using var dlg = new OpenFileDialog();
             dlg.Filter = "HTML files (*.html;*.htm)|*.html;*.htm|Text files (*.txt)|*.txt|All files (*.*)|*.*";
@@ -28,7 +28,7 @@ namespace RTL.Editor.App
             if (dlg.ShowDialog() != DialogResult.OK)
                 return;
 
-            string content = System.IO.File.ReadAllText(dlg.FileName);
+            var content = File.ReadAllText(dlg.FileName);
 
             // If it's plain text, HTML-encode it
             if (dlg.FileName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
@@ -43,7 +43,7 @@ namespace RTL.Editor.App
             await webView.CoreWebView2.ExecuteScriptAsync(script);
         }
 
-        private async void saveFileToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void SaveFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             using var dlg = new SaveFileDialog();
             dlg.Filter = "HTML files (*.html)|*.html|Text files (*.txt)|*.txt";
@@ -52,24 +52,24 @@ namespace RTL.Editor.App
             if (dlg.ShowDialog() != DialogResult.OK)
                 return;
 
-            string script = @"
-        (function() {
-            const editor = document.getElementById('editor');
-            return editor ? editor.innerHTML : '';
-        })();";
+        //    string script = @"
+        //(function() {
+        //    const editor = document.getElementById('editor');
+        //    return editor ? editor.innerHTML : '';
+        //})();";
 
-            string result = await webView.CoreWebView2.ExecuteScriptAsync(script);
-            string html = System.Text.Json.JsonSerializer.Deserialize<string>(result) ?? "";
+            string result = await webView.CoreWebView2.ExecuteScriptAsync("getInnerHTML");
+            string html = JsonSerializer.Deserialize<string>(result) ?? "";
 
             if (dlg.FileName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
             {
                 // Convert HTML → plain text
                 string plain = System.Text.RegularExpressions.Regex.Replace(html, "<.*?>", "");
-                System.IO.File.WriteAllText(dlg.FileName, plain);
+                File.WriteAllText(dlg.FileName, plain);
             }
             else
             {
-                System.IO.File.WriteAllText(dlg.FileName, html);
+                File.WriteAllText(dlg.FileName, html);
             }
         }
 
@@ -93,107 +93,52 @@ namespace RTL.Editor.App
 
         private record WebMessage(string type, string html);
 
-        private string GetEditorHtml()
+        private static string GetHtml()
         {
-            // Minimal RTL contentEditable editor with basic toolbar
-            return @"
-<!DOCTYPE html>
-<html lang=""he"">
-<head>
-<meta charset=""UTF-8"">
-<title>RTL Editor</title>
-<style>
-    body {
-        margin: 0;
-        font-family: 'Segoe UI', sans-serif;
-        background: #f0f0f0;
-    }
-    #toolbar {
-        background: #333;
-        color: white;
-        padding: 6px;
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        direction: ltr; /* toolbar itself LTR */
-    }
-    #toolbar button {
-        padding: 4px 8px;
-        border: none;
-        background: #555;
-        color: white;
-        cursor: pointer;
-    }
-    #toolbar button:hover {
-        background: #777;
-    }
-    #editor {
-        padding: 12px;
-        height: calc(100vh - 40px);
-        box-sizing: border-box;
-        background: white;
-        direction: rtl;
-        unicode-bidi: plaintext;
-        text-align: right;
-        font-size: 18px;
-        line-height: 1.6;
-    }
-    #editor:focus {
-        outline: none;
-    }
-</style>
-</head>
-<body>
-<div id=""toolbar"">
-    <button onclick=""document.execCommand('bold')""><b>B</b></button>
-    <button onclick=""document.execCommand('italic')""><i>I</i></button>
-    <button onclick=""document.execCommand('underline')""><u>U</u></button>
-    <button onclick=""setDir('rtl')"">RTL</button>
-    <button onclick=""setDir('ltr')"">LTR</button>
-</div>
-<div id=""editor"" contenteditable=""true"">
-    שלום עולם! זהו עורך טקסט RTL בתוך WebView2.
-</div>
+            string resourceName = "RTL.Editor.App.editor.html"; 
+            string result = string.Empty;
 
-<script>
-    const editor = document.getElementById('editor');
+            // Get the assembly that contains the embedded resource
+            Assembly assembly = Assembly.GetExecutingAssembly();
 
-    function setDir(dir) {
-        editor.style.direction = dir;
-        editor.style.textAlign = (dir === 'rtl') ? 'right' : 'left';
-    }
+            // Get the resource stream
+            var resource = assembly.GetManifestResourceNames().FirstOrDefault(rn => rn == resourceName);
+            if (resource != null)
+            {
+                using (Stream? stream = assembly.GetManifestResourceStream(resource))
+                {
+                    if (stream == null)
+                    {
+                        // Handle the case where the resource is not found (stream will be null)
+                        Console.WriteLine($"Resource '{resourceName}' not found.");
+                    }
+                    else
+                    {
+                        // Read the stream content using a StreamReader
+                        using StreamReader reader = new(stream);
+                        result = reader.ReadToEnd();
+                    }
+                }
 
-    function notifyChange() {
-        const msg = {
-            type: 'contentChanged',
-            html: editor.innerHTML
-        };
-        if (window.chrome && window.chrome.webview) {
-            window.chrome.webview.postMessage(msg);
-        }
-    }
-
-    editor.addEventListener('input', notifyChange);
-</script>
-</body>
-</html>";
+            }
+            return result;
         }
 
-        private async void loadSampleToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (webView.CoreWebView2 == null) return;
+        //private async void LoadSampleToolStripMenuItem_Click(object sender, EventArgs e)
+        //{
+        //    if (webView.CoreWebView2 == null) return;
 
-            string sample = "שלום, זה טקסט לדוגמה עם עברית ו English ביחד.";
-            string script = $@"
-                (function() {{
-                    const editor = document.getElementById('editor');
-                    if (editor) editor.innerHTML = '{EscapeForJs(sample)}';
-                }})();";
+        //    string sample = "שלום, זה טקסט לדוגמה עם עברית ו English ביחד.";
+        //    string script = $@"
+        //        (function() {{
+        //            const editor = document.getElementById('editor');
+        //            if (editor) editor.innerHTML = '{EscapeForJs(sample)}';
+        //        }})();";
 
-            await webView.CoreWebView2.ExecuteScriptAsync(script);
-        }
+        //    await webView.CoreWebView2.ExecuteScriptAsync(script);
+        //}
 
-        private async void getHtmlToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void GetHtmlToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (webView.CoreWebView2 == null) return;
 
@@ -211,6 +156,20 @@ namespace RTL.Editor.App
             MessageBox.Show(this, html, "Editor HTML", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
+        //private void getClipboardTextButton_Click(object sender, EventArgs e)
+        //{
+        //    if (Clipboard.ContainsText())
+        //    {
+        //        string clipboardText = Clipboard.GetText();
+        //        MessageBox.Show("Text from clipboard: " + clipboardText);
+        //    }
+        //    else
+        //    {
+        //        MessageBox.Show("Clipboard does not contain text.");
+        //    }
+        //}
+
+
         private static string EscapeForJs(string text)
         {
             return text
@@ -219,6 +178,17 @@ namespace RTL.Editor.App
                 .Replace("\r", "")
                 .Replace("\n", "\\n");
         }
+
+       
+
+        private readonly Dictionary<char, char> latinToHebrewMap = new()
+        {
+         {'a','א'}, {'b','ב'}, {'g', 'ג'}, {'d', 'ד'}, {'h','ה' },
+            {'v','ו'}, {'z','ז'}, {'x', 'ח'}, {'j', 'ט'}, {'y','י'},
+            {'k','כ'}, {'K','ך'}, {'l','ל'}, {'m', 'מ'}, {'M', 'ם'}, {'n', 'נ'}, {'N', 'ן'},{'s', 'ס'},
+            {'w', 'ע'}, {'p','פ'},{'P','ף'}, {'c','צ'}, {'C','ץ'}, {'q','ק'}, {'r','ר'},
+            {'i','ש'}, {'t', 'ת'}
+        };    
 
     }
 }
