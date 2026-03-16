@@ -61,9 +61,8 @@
     <div id="editor" contenteditable="true">
         שלום עולם! זהו עורך טקסט RTL בתוך WebView2.
     </div>
-
+    <script src="functions.js" type="text/javascript"></script>
     <script>
-        const editor = document.getElementById('editor');
 
         var d = {};
         d['a'] = 'א';
@@ -94,38 +93,10 @@
         d['i'] = 'ש';
         d['t'] = 'ת';
 
-        function getInnerHTML() {
-            return editor ? editor.innerHTML : '';
-        }
+       
 
-        function setDir(dir) {
-            editor.style.direction = dir;
-            editor.style.textAlign = (dir === 'rtl') ? 'right' : 'left';
-        }
-
-        function notifyChange() {
-            const msg = {
-                type: 'contentChanged',
-                html: editor.innerHTML
-            };
-            if (window.chrome && window.chrome.webview) {
-                window.chrome.webview.postMessage(msg);
-            }
-        }
-
-
-        editor.addEventListener('input', notifyChange);
-
-        function modifyClipboardText()  {
-            try {
-                window.chrome.webview.postMessage({ type: 'getClipboardText' });
-                //             await navigator.clipboard.writeText(result);
-            } catch (err) {
-                console.error('Failed to transmit message: ', err);
-            }
-        }
-
-        document.getElementById('rev').addEventListener('click', modifyClipboardText);
+     
+        
 
 
         // Function to replace characters in a string based on a mapping
@@ -146,47 +117,47 @@
         //    return result;
         //}
 
-        async function pasteTextAtCursor() {
-            try {
-                // Request clipboard text
-                let text = await navigator.clipboard.readText();
-                if (!text) {
-                    console.warn("No clipboard text found.");
-                    return;
-                }
-                // Transform the text using the mapping
-                //   let result = replaceChars(text);
-                // Display it
+        //async function pasteTextAtCursor() {
+        //    try {
+        //        // Request clipboard text
+        //        let text = await navigator.clipboard.readText();
+        //        if (!text) {
+        //            console.warn("No clipboard text found.");
+        //            return;
+        //        }
+        //        // Transform the text using the mapping
+        //        //   let result = replaceChars(text);
+        //        // Display it
 
-                const sel = window.getSelection();
+        //        const sel = window.getSelection();
 
-                // Ensure there is a valid selection and range
-                if (!sel || sel.rangeCount === 0) {
-                    console.warn("No selection found.");
-                    return;
-                }
+        //        // Ensure there is a valid selection and range
+        //        if (!sel || sel.rangeCount === 0) {
+        //            console.warn("No selection found.");
+        //            return;
+        //        }
 
-                const range = sel.getRangeAt(0);
-                range.deleteContents(); // Remove any selected text
+        //        const range = sel.getRangeAt(0);
+        //        range.deleteContents(); // Remove any selected text
 
-                // Create a text node for the inserted text
-                const textNode = document.createTextNode(text);
+        //        // Create a text node for the inserted text
+        //        const textNode = document.createTextNode(text);
 
-                // Insert the text node at the cursor
-                range.insertNode(textNode);
+        //        // Insert the text node at the cursor
+        //        range.insertNode(textNode);
 
-                // Move the caret after the inserted text
-                range.setStartAfter(textNode);
-                range.setEndAfter(textNode);
+        //        // Move the caret after the inserted text
+        //        range.setStartAfter(textNode);
+        //        range.setEndAfter(textNode);
 
-                // Update the selection to the new range
-                sel.removeAllRanges();
-                sel.addRange(range);
+        //        // Update the selection to the new range
+        //        sel.removeAllRanges();
+        //        sel.addRange(range);
 
-            } catch (err) {
-                console.error('Failed to read clipboard: ', err);
-            }
-        }
+        //    } catch (err) {
+        //        console.error('Failed to read clipboard: ', err);
+        //    }
+        //}
     </script>
 </body>
 </html>

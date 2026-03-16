@@ -1,4 +1,5 @@
 ﻿using Microsoft.Web.WebView2.Core;
+using Microsoft.Web.WebView2.Wpf;
 using System.Reflection;
 using System.Text.Json;
 
@@ -16,10 +17,23 @@ namespace RTL.Editor.App
         private async void MainForm_Load(object? sender, EventArgs e)
         {
             await webView.EnsureCoreWebView2Async();
+
+            // Map the virtual host name to the local folder
+            string hostName = "app.local";
+            string appExecutablePath = AppContext.BaseDirectory; // Gets the directory where the app assembly is located
+            string relativeFolderPath = "wwwroot"; // The relative path within the output directory
+            string absoluteFolderPath = Path.Combine(appExecutablePath, relativeFolderPath);
+            Directory.CreateDirectory(absoluteFolderPath); // Ensure the folder exists
+
+            webView.CoreWebView2.SetVirtualHostNameToFolderMapping(
+                hostName,
+                absoluteFolderPath,
+                CoreWebView2HostResourceAccessKind.Allow
+            );
             // Optional: listen for messages from JS
             _listener = new JsEventListener(webView.CoreWebView2);
             //            webView.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
-            webView.CoreWebView2.NavigateToString(GetHtml());
+            webView.CoreWebView2.Navigate($"https://{hostName}/editor.html");
         }
 
         private async void OpenFileToolStripMenuItem_Click(object sender, EventArgs e)
@@ -54,12 +68,6 @@ namespace RTL.Editor.App
             if (dlg.ShowDialog() != DialogResult.OK)
                 return;
 
-        //    string script = @"
-        //(function() {
-        //    const editor = document.getElementById('editor');
-        //    return editor ? editor.innerHTML : '';
-        //})();";
-
             string result = await webView.CoreWebView2.ExecuteScriptAsync("getInnerHTML");
             string html = JsonSerializer.Deserialize<string>(result) ?? "";
 
@@ -75,56 +83,56 @@ namespace RTL.Editor.App
             }
         }
 
-        //private void CoreWebView2_WebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
-        //{
-        //    try
-        //    {
-        //        var json = e.WebMessageAsJson;
-        //        var msg = JsonSerializer.Deserialize<WebMessage>(json);
-        //        if (msg?.type == "contentChanged")
-        //        {
-        //            // For now, just write to debug output
-        //            System.Diagnostics.Debug.WriteLine("Content changed: " + msg.html);
-        //        }
-        //    }
-        //    catch
-        //    {
-        //        // ignore
-        //    }
-        //}
+        private void CoreWebView2_WebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
+        {
+            try
+            {
+                var json = e.WebMessageAsJson;
+                var msg = JsonSerializer.Deserialize<WebMessage>(json);
+                if (msg?.type == "contentChanged")
+                {
+                    // For now, just write to debug output
+                    System.Diagnostics.Debug.WriteLine("Content changed: " + msg.html);
+                }
+            }
+            catch
+            {
+                // ignore
+            }
+        }
 
         private record WebMessage(string type, string html);
 
-        private static string GetHtml()
-        {
-            string resourceName = "RTL.Editor.App.editor.html"; 
-            string result = string.Empty;
+        //private static string GetHtml()
+        //{
+        //    string resourceName = "RTL.Editor.App.editor.html"; 
+        //    string result = string.Empty;
 
-            // Get the assembly that contains the embedded resource
-            Assembly assembly = Assembly.GetExecutingAssembly();
+        //    // Get the assembly that contains the embedded resource
+        //    Assembly assembly = Assembly.GetExecutingAssembly();
 
-            // Get the resource stream
-            var resource = assembly.GetManifestResourceNames().FirstOrDefault(rn => rn == resourceName);
-            if (resource != null)
-            {
-                using (Stream? stream = assembly.GetManifestResourceStream(resource))
-                {
-                    if (stream == null)
-                    {
-                        // Handle the case where the resource is not found (stream will be null)
-                        Console.WriteLine($"Resource '{resourceName}' not found.");
-                    }
-                    else
-                    {
-                        // Read the stream content using a StreamReader
-                        using StreamReader reader = new(stream);
-                        result = reader.ReadToEnd();
-                    }
-                }
+        //    // Get the resource stream
+        //    var resource = assembly.GetManifestResourceNames().FirstOrDefault(rn => rn == resourceName);
+        //    if (resource != null)
+        //    {
+        //        using (Stream? stream = assembly.GetManifestResourceStream(resource))
+        //        {
+        //            if (stream == null)
+        //            {
+        //                // Handle the case where the resource is not found (stream will be null)
+        //                Console.WriteLine($"Resource '{resourceName}' not found.");
+        //            }
+        //            else
+        //            {
+        //                // Read the stream content using a StreamReader
+        //                using StreamReader reader = new(stream);
+        //                result = reader.ReadToEnd();
+        //            }
+        //        }
 
-            }
-            return result;
-        }
+        //    }
+        //    return result;
+        //}
 
         //private async void LoadSampleToolStripMenuItem_Click(object sender, EventArgs e)
         //{

@@ -13,7 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="editor.html" />
+    <Content Include="wwwroot\editor.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
