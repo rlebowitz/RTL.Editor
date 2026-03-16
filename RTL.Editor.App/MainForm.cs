@@ -7,6 +7,7 @@ namespace RTL.Editor.App
 {
     public partial class MainForm : Form
     {
+        private JsEventListener? _listener;
         public MainForm()
         {
             InitializeComponent();
@@ -16,7 +17,8 @@ namespace RTL.Editor.App
         {
             await webView.EnsureCoreWebView2Async();
             // Optional: listen for messages from JS
-            webView.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
+            _listener = new JsEventListener(webView.CoreWebView2);
+            //            webView.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
             webView.CoreWebView2.NavigateToString(GetHtml());
         }
 
@@ -73,23 +75,23 @@ namespace RTL.Editor.App
             }
         }
 
-        private void CoreWebView2_WebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
-        {
-            try
-            {
-                var json = e.WebMessageAsJson;
-                var msg = JsonSerializer.Deserialize<WebMessage>(json);
-                if (msg?.type == "contentChanged")
-                {
-                    // For now, just write to debug output
-                    System.Diagnostics.Debug.WriteLine("Content changed: " + msg.html);
-                }
-            }
-            catch
-            {
-                // ignore
-            }
-        }
+        //private void CoreWebView2_WebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
+        //{
+        //    try
+        //    {
+        //        var json = e.WebMessageAsJson;
+        //        var msg = JsonSerializer.Deserialize<WebMessage>(json);
+        //        if (msg?.type == "contentChanged")
+        //        {
+        //            // For now, just write to debug output
+        //            System.Diagnostics.Debug.WriteLine("Content changed: " + msg.html);
+        //        }
+        //    }
+        //    catch
+        //    {
+        //        // ignore
+        //    }
+        //}
 
         private record WebMessage(string type, string html);
 
@@ -181,14 +183,6 @@ namespace RTL.Editor.App
 
        
 
-        private readonly Dictionary<char, char> latinToHebrewMap = new()
-        {
-         {'a','א'}, {'b','ב'}, {'g', 'ג'}, {'d', 'ד'}, {'h','ה' },
-            {'v','ו'}, {'z','ז'}, {'x', 'ח'}, {'j', 'ט'}, {'y','י'},
-            {'k','כ'}, {'K','ך'}, {'l','ל'}, {'m', 'מ'}, {'M', 'ם'}, {'n', 'נ'}, {'N', 'ן'},{'s', 'ס'},
-            {'w', 'ע'}, {'p','פ'},{'P','ף'}, {'c','צ'}, {'C','ץ'}, {'q','ק'}, {'r','ר'},
-            {'i','ש'}, {'t', 'ת'}
-        };    
 
     }
 }

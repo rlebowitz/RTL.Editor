@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "RTL.Editor.App": {
+      "commandName": "Project",
+      "jsWebView2Debugging": true,
+      "nativeDebugging": true,
+      "hotReloadEnabled": false
+    }
+  }
+}

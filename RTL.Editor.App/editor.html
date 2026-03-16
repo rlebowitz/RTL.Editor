@@ -54,7 +54,7 @@
         <button onclick="document.execCommand('bold')"><b>B</b></button>
         <button onclick="document.execCommand('italic')"><i>I</i></button>
         <button onclick="document.execCommand('underline')"><u>U</u></button>
-        <button onclick="pasteTextAtCursor()">Rev</button>
+        <button id ="rev">Rev</button>
         <button onclick="setDir('rtl')">RTL</button>
         <button onclick="setDir('ltr')">LTR</button>
     </div>
@@ -113,37 +113,49 @@
             }
         }
 
+
         editor.addEventListener('input', notifyChange);
 
-        // Function to replace characters in a string based on a mapping
-        function replaceChars(str) {
-            if (typeof str !== "string") {
-                throw new TypeError("Input must be a string");
+        function modifyClipboardText()  {
+            try {
+                window.chrome.webview.postMessage({ type: 'getClipboardText' });
+                //             await navigator.clipboard.writeText(result);
+            } catch (err) {
+                console.error('Failed to transmit message: ', err);
             }
-
-            let result = "";
-
-            // Loop through each character
-            for (let i = 0; i < str.length; i++) {
-                const char = str[i];
-                // If the character exists in the mapping, replace it; otherwise keep it
-                result += replacements.hasOwnProperty(char) ? replacements[char] : char;
-            }
-
-            return result;
         }
 
-        function pasteTextAtCursor() {
+        document.getElementById('rev').addEventListener('click', modifyClipboardText);
+
+
+        // Function to replace characters in a string based on a mapping
+        //function replaceChars(str) {
+        //    if (typeof str !== "string") {
+        //        throw new TypeError("Input must be a string");
+        //    }
+
+        //    let result = "";
+
+        //    // Loop through each character
+        //    for (let i = 0; i < str.length; i++) {
+        //        const char = str[i];
+        //        // If the character exists in the mapping, replace it; otherwise keep it
+        //        result += replacements.hasOwnProperty(char) ? replacements[char] : char;
+        //    }
+
+        //    return result;
+        //}
+
+        async function pasteTextAtCursor() {
             try {
                 // Request clipboard text
-                debugger;
                 let text = await navigator.clipboard.readText();
                 if (!text) {
                     console.warn("No clipboard text found.");
                     return;
                 }
                 // Transform the text using the mapping
-                let result = replaceChars(text);
+                //   let result = replaceChars(text);
                 // Display it
 
                 const sel = window.getSelection();
@@ -174,6 +186,7 @@
             } catch (err) {
                 console.error('Failed to read clipboard: ', err);
             }
+        }
     </script>
 </body>
 </html>
