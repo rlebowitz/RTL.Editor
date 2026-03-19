@@ -1,4 +1,3 @@
 <Solution>
   <Project Path="RTL.Editor.App/RTL.Editor.App.csproj" />
-  <Project Path="RTL.Editor.Web/RTL.Editor.Web.csproj" />
 </Solution>

@@ -1,0 +1,43 @@
+﻿body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: #f0f0f0;
+}
+
+#toolbar {
+    background: #333;
+    color: white;
+    padding: 6px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    direction: ltr;
+}
+
+    #toolbar button {
+        padding: 4px 8px;
+        border: none;
+        background: #555;
+        color: white;
+        cursor: pointer;
+    }
+
+        #toolbar button:hover {
+            background: #777;
+        }
+
+#editor {
+    padding: 12px;
+    height: calc(100vh - 40px);
+    box-sizing: border-box;
+    background: white;
+    direction: rtl;
+    unicode-bidi: plaintext;
+    text-align: right;
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+    #editor:focus {
+        outline: none;
+    }

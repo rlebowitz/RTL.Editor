@@ -22,6 +22,11 @@ namespace RTL.Editor.App
             _core.WebMessageReceived += Core_WebMessageReceived;
         }
 
+        private void StringMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
+        {
+            var str = e.TryGetWebMessageAsString();
+        }
+
         private void Core_WebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
             var json = e.WebMessageAsJson;
@@ -44,6 +49,7 @@ namespace RTL.Editor.App
                     case "null":
                         Console.WriteLine("Received null event");
                         break;
+                        
                     case "getClipboardText":
                         if (Clipboard.ContainsText())
                         {

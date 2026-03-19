@@ -3,65 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>RTL Editor</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-            background: #f0f0f0;
-        }
-
-        #toolbar {
-            background: #333;
-            color: white;
-            padding: 6px;
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            direction: ltr;
-        }
-
-            #toolbar button {
-                padding: 4px 8px;
-                border: none;
-                background: #555;
-                color: white;
-                cursor: pointer;
-            }
-
-                #toolbar button:hover {
-                    background: #777;
-                }
-
-        #editor {
-            padding: 12px;
-            height: calc(100vh - 40px);
-            box-sizing: border-box;
-            background: white;
-            direction: rtl;
-            unicode-bidi: plaintext;
-            text-align: right;
-            font-size: 18px;
-            line-height: 1.6;
-        }
-
-            #editor:focus {
-                outline: none;
-            }
-    </style>
+    <link href="https://app.local/editor.css" rel="stylesheet" type="text/css">
 </head>
 <body>
     <div id="toolbar">
         <button onclick="document.execCommand('bold')"><b>B</b></button>
         <button onclick="document.execCommand('italic')"><i>I</i></button>
         <button onclick="document.execCommand('underline')"><u>U</u></button>
-        <button id ="rev">Rev</button>
+        <button id="rev">Rev</button>
         <button onclick="setDir('rtl')">RTL</button>
         <button onclick="setDir('ltr')">LTR</button>
     </div>
     <div id="editor" contenteditable="true">
         שלום עולם! זהו עורך טקסט RTL בתוך WebView2.
     </div>
-    <script src="functions.js" type="text/javascript"></script>
+    <script src="https://app.local/functions.js" type="text/javascript"></script>
     <script>
 
         var d = {};
@@ -93,10 +49,10 @@
         d['i'] = 'ש';
         d['t'] = 'ת';
 
-       
 
-     
-        
+
+
+
 
 
         // Function to replace characters in a string based on a mapping

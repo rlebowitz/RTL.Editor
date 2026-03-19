@@ -2,6 +2,7 @@
 using Microsoft.Web.WebView2.Wpf;
 using System.Reflection;
 using System.Text.Json;
+using static System.Net.Mime.MediaTypeNames;
 
 
 namespace RTL.Editor.App
@@ -21,7 +22,7 @@ namespace RTL.Editor.App
             // Map the virtual host name to the local folder
             string hostName = "app.local";
             string appExecutablePath = AppContext.BaseDirectory; // Gets the directory where the app assembly is located
-            string relativeFolderPath = "wwwroot"; // The relative path within the output directory
+            string relativeFolderPath = "Assets"; // The relative path within the output directory
             string absoluteFolderPath = Path.Combine(appExecutablePath, relativeFolderPath);
             Directory.CreateDirectory(absoluteFolderPath); // Ensure the folder exists
 
@@ -32,11 +33,10 @@ namespace RTL.Editor.App
             );
             // Optional: listen for messages from JS
             _listener = new JsEventListener(webView.CoreWebView2);
-            //            webView.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
             webView.CoreWebView2.Navigate($"https://{hostName}/editor.html");
         }
 
-        private async void OpenFileToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OpenFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             using var dlg = new OpenFileDialog();
             dlg.Filter = "HTML files (*.html;*.htm)|*.html;*.htm|Text files (*.txt)|*.txt|All files (*.*)|*.*";
@@ -48,15 +48,21 @@ namespace RTL.Editor.App
 
             // If it's plain text, HTML-encode it
             if (dlg.FileName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
-                content = System.Net.WebUtility.HtmlEncode(content).Replace("\n", "<br>");
-
-            string script = $@"
-        (function() {{
-            const editor = document.getElementById('editor');
-            if (editor) editor.innerHTML = `{EscapeForJs(content)}`;
-        }})();";
-
-            await webView.CoreWebView2.ExecuteScriptAsync(script);
+            {
+                content = System.Net.WebUtility.HtmlEncode(content)
+                .Replace("\\", "\\\\")
+                .Replace("'", "\\'")
+                .Replace("\r", "")
+                .Replace("\n", "<br>");
+            }
+            var message = JsonSerializer.Serialize<WebMessage>(new WebMessage("textfile", content));
+            webView.CoreWebView2.PostWebMessageAsJson(message);
+            //    string script = $@"
+            //(function() {{
+            //    const editor = document.getElementById('editor');
+            //    if (editor) editor.innerHTML = `{EscapeForJs(content)}`;
+            //}})();";
+            //    await webView.CoreWebView2.ExecuteScriptAsync(script);
         }
 
         private async void SaveFileToolStripMenuItem_Click(object sender, EventArgs e)
@@ -92,7 +98,7 @@ namespace RTL.Editor.App
                 if (msg?.type == "contentChanged")
                 {
                     // For now, just write to debug output
-                    System.Diagnostics.Debug.WriteLine("Content changed: " + msg.html);
+                    System.Diagnostics.Debug.WriteLine("Content changed: " + msg.text);
                 }
             }
             catch
@@ -101,7 +107,7 @@ namespace RTL.Editor.App
             }
         }
 
-        private record WebMessage(string type, string html);
+        private record WebMessage(string type, string text);
 
         //private static string GetHtml()
         //{
@@ -189,7 +195,7 @@ namespace RTL.Editor.App
                 .Replace("\n", "\\n");
         }
 
-       
+
 
 
     }

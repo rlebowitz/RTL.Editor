@@ -5,6 +5,12 @@ function getInnerHTML() {
     return editor ? editor.innerHTML : '';
 }
 
+function setInnerHTML(content) {
+    if (editor) {
+        editor.innerHTML = content;
+    }
+}
+
 function setDir(dir) {
     editor.style.direction = dir;
     editor.style.textAlign = (dir === 'rtl') ? 'right' : 'left';
@@ -29,6 +35,16 @@ function modifyClipboardText() {
     }
 }
 
+function receiveText(arg) {
+    arg.data
+}
 editor.addEventListener('input', notifyChange);
+
 rev.addEventListener('click', modifyClipboardText);
+
+window.chrome.webview.addEventListener('message', arg => {
+    if ("textfile" in arg.data) {
+        setInnerHTML(arg.data.text);
+    }
+});
 
