@@ -1,8 +1,6 @@
 ﻿using Microsoft.Web.WebView2.Core;
-using Microsoft.Web.WebView2.Wpf;
-using System.Reflection;
+using System.IO;
 using System.Text.Json;
-using static System.Net.Mime.MediaTypeNames;
 
 
 namespace RTL.Editor.App
